@@ -1,0 +1,18 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "centos/atomic-host"
+
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.vbguest.auto_update = false
+  end
+  
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 9090, host: 9090
+
+  config.vm.provision "shell", path: "bootstrap.sh", privileged: true
+
+
+end

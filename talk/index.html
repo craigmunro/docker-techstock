@@ -1,0 +1,589 @@
+  <!doctype html>
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>TechStock: OpenShift</title>
+
+    <meta name="description" content="OpenShift">
+    <meta name="author" content="Craig Munro">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/sky.css" id="theme">
+    <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+     var link = document.createElement( 'link' );
+     link.rel = 'stylesheet';
+     link.type = 'text/css';
+     link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+     document.getElementsByTagName( 'head' )[0].appendChild( link );
+   </script>
+
+  		<!--[if lt IE 9]>
+  		<script src="lib/js/html5shiv.js"></script>
+  		<![endif]-->
+  	</head>
+
+  	<body>
+
+  		<div class="reveal">
+
+  			<!-- Any section element inside of this container is displayed as a slide -->
+  			<div class="slides">
+  				<section data-background="images/openshift.png">
+  					<h1>OpenShift</h1>
+  					
+  					<p>
+  						<small><a href="mailto:craig.munro@rbs.com">craig.munro@rbs.com</a><br /><br />High Performance Computing</small>
+  					</p>
+
+           <img  data-src="images/openshift_logo.png" alt="OpenShift">
+         </section>
+
+         <section>
+         <h2>Drivers</h2>
+         <br />
+         <br />
+          <table width="80%">
+            <tr>
+              <td>
+                <div class=fragment>
+                  <h4>External</h4>
+                  <ul>
+                    <li>DevOps</li>
+                    <li>Microservices</li>
+                  </ul>
+                </div>
+              </td>
+              <td>
+                <div class=fragment>
+                  <h4>Internal</h4>
+                  <ul>
+                    <li>Costs</li>
+                    <li>Agility</li>
+                    <li>Efficiency</li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </table>
+         </section>
+
+        <section data-background="images/docker.jpg">
+          <h2>&nbsp;</h2>
+        </section>
+
+        <section>
+
+          <section>
+            <h2>Build</h2>
+            <pre><code data-trim contenteditable>
+# Use latest base image
+FROM rbs/base-jdk:8
+
+MAINTAINER hpc@rbs.com 
+
+# install dependencies
+RUN yum install maven
+
+# Set Environment variables
+ENV WILDFLY_VERSION 9.0.0.Final
+ENV JBOSS_HOME /opt/jboss/wildfly
+
+# Add the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
+RUN cd $HOME && curl http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz | tar zx && mv $HOME/wildfly-$WILDFLY_VERSION $HOME/wildfly
+
+# Expose the ports we're interested in
+EXPOSE 8080
+
+# Set the default command to run on boot
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+            </code></pre>
+          </section>
+                
+          <section>
+            <h2>Build</h2>
+            <ul>
+              <li>Base images can be managed and updated centrally</li>
+              <li>Application teams only need to add application code</li>
+              <li>Requires dependencies and environment to be explicitly specified</li>
+              <li>Should be version controlled</li>
+            </ul>
+          </section>
+
+        </section>
+
+        <section>
+          
+          <h2>Deploy</h2>
+
+          <ul>
+            <li>Images can be stored centrally and pulled on demand</li>
+            <li>Images will run on any Docker enabled host</li>
+            <li>As all dependencies are contained within image they can be updated without conflicting with other application</li>
+          </ul>
+
+        </section>  
+
+        <section >
+          <section>
+            <h2>Run</h2>
+            <img  data-src="images/docker_layers.png" alt="Docker Layers">
+          </section>
+
+          <section >
+            <h2>Namespaces</h2>
+
+            Each container can only see its own filesystem, network stack and process state.
+
+          </section>
+
+           <section >
+            <h2>Control Groups</h2>
+
+            <p>Control groups limit the resources each container has access to.</p>
+
+            <p>CPU, memory, disk IO, network IO</p>
+
+          </section>
+        
+        </section>
+
+        <section data-transition="convex-in none-out">
+
+          <table>
+            <thead>
+
+              <tr>
+                <th></th>
+                <th><img data-src="images/physical2.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/blank.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/blank.png" alt="Physical -> Virtual -> Container"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td><strong>Physical</strong></td>
+                <td></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>Performance</td>
+                <td><i class="em em-smiley"></td>
+                <td></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>Utilisation</td>
+                <td><i class="em em-cry"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Lead Time</td>
+                <td><i class="em em-cry"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Management</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Agility</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </section>
+
+        <section data-transition="none">
+
+          <table>
+            <thead>
+
+              <tr>
+                <th></th>
+                <th><img data-src="images/physical2.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/virtual2.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/blank.png" alt="Physical -> Virtual -> Container"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td><strong>Physical</strong></td>
+                <td><strong>Virtual</strong></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>Performance</td>
+                <td><i class="em em-smiley"></i></td>
+                <td><i class="em em-confused"></i></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>Utilisation</td>
+                <td><i class="em em-cry"></i></td>
+                <td><i class="em em-smiley"></i></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Lead Time</td>
+                <td><i class="em em-cry"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Management</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Agility</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </section>
+
+
+        <section data-transition="none">
+
+          <table>
+            <thead>
+
+              <tr>
+                <th></th>
+                <th><img data-src="images/physical2.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/virtual2.png" alt="Physical -> Virtual -> Container"></th>
+                <th><img data-src="images/container2.png" alt="Physical -> Virtual -> Container"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td><strong>Physical</strong></td>
+                <td><strong>Virtual</strong></td>
+                <td><strong>Container</strong></td>
+              </tr>
+
+              <tr>
+                <td>Performance</td>
+                <td><i class="em em-smiley"></i></td>
+                <td><i class="em em-confused"></i></td>
+                <td><i class="em em-smiley"></i></td>
+              </tr>
+
+              <tr>
+                <td>Utilisation</td>
+                <td><i class="em em-cry"></i></td>
+                <td><i class="em em-smiley"></i></td>
+                <td><i class="em em-smiley"></i></td>
+              </tr>
+              <tr>
+                <td>Lead Time</td>
+                <td><i class="em em-cry"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-smiley"></i></td>
+              </tr>
+              <tr>
+                <td>Management</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-smiley"></i></td>
+              </tr>
+              <tr>
+                <td>Agility</td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-disappointed"></i></td>
+                <td><i class="em em-smiley"></i></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </section>
+
+        <section  data-background="images/kubernetes.jpg">
+          <h2>&nbsp;</h2>
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+
+          <blockquote class=fragment style="color:#ffffff;">Manage a cluster of linux containers as a single system to accelerate Dev and simplify Ops</blockquote>
+        </section>
+
+        <section data-background="images/openshift.jpg">
+          <h2>&nbsp;</h2>
+        </section>
+
+        <section>
+          <img  data-src="images/product_layers.png" alt="Docker -> Kubernetes -> OpenShift">
+        </section>
+
+        <section>
+          <section>
+            <h2>Pods</h2>
+
+            <p class=fragment>1 or more containers</p>
+            <p class=fragment>Share volumes, localhost etc.</p>
+            <p class=fragment>Routable, IP address</p>
+            <p class=fragment>Limit Resources</p>
+            <p class=fragment>Ephemeral.</p>
+              
+          </section>
+
+          <section>
+            <h2>Replication Controller</h2>
+
+            <p class=fragment>Ensures correct Pods are running</p>
+            <p class=fragment>Scaling</p>
+            <p class=fragment>Deployment Strategies</p>
+              
+          </section>
+
+          <section>
+            <h2>Services</h2>
+
+            <p class=fragment>Stable, Virtual IP address that load balances across running Pods</p>
+
+          </section>
+
+          <section>
+            <h2>Labels & Selectors</h2>
+
+            <p>Add arbitrary key/value pairs to any object</p>
+            <pre><code>name=myapp, env=prd, version=1234</code></pre>
+
+            <p>Services and Replication controllers use Selectors to select correct pods</p>
+          </section>
+
+          <section>
+            <h2>Projects</h2>
+
+            <ul>
+              <li>Everything in OpenShift belongs to a project.</li>
+              <li>Cluster Administrators can assign quotas to projects which limits the resources (CPU, Mem, etc)</li>
+              <li>Project administrators can do everything else</li>
+            </ul>
+
+          </section>
+
+        </section>
+
+        <section>
+
+          <section>
+            <h2>Replication Controller</h2>
+            <pre><code data-trim contenteditable>
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: helloworld-1
+spec:
+  template:
+    metadata:
+      labels:
+        name: helloworld
+        version: version-one
+    spec:
+      containers:
+        - name: helloworld
+          image: craigmunro/centos-node-hello:1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 1
+            initialDelaySeconds: 5
+      nodeSelector:
+        region: primary
+  selector:
+    name: helloworld
+    version: version-one
+  replicas: 1
+            </code></pre>
+          </section>
+
+          <section>
+
+            <h2>Service</h2>
+
+            <pre><code data-trim contenteditable>
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    name: helloworld
+            </code></pre>
+          </section>
+
+        </section>
+
+        <section>
+          <h2>Demo One!</h2>
+          <ul>
+            <li class=fragment>Deploy and run a docker container</li>
+            <li class=fragment>Scale out</li>
+            <li class=fragment>Quotas & Limits</li>
+            <li class=fragment>Deployment Strategies</li>
+          </ul>
+           
+          </p>
+        </section>
+
+         <section>
+
+          <h2>Infrastructure as Code</h2>
+
+          <br />
+          <p>A template describes a set of objects (Services, Pods, etc) that can be parameterized and processed to create complete applications in OpenShift.</p>
+
+
+
+        </section>
+
+        <section>
+
+          <h2>Source 2 Image</h2>
+
+          <img data-src="images/sti.png" alt="STI">
+
+          <br /><br />
+          <p>Automatically build application code and combine with centrally managed platform images</p>
+
+        </section>
+
+        <section>
+
+          <h2>Demo Two!</h2>
+
+          <ul>
+            <li class=fragment>Templates</li>
+            <li class=fragment>Source 2 Image</li>
+            <li class=fragment>Multi-tier</li>
+          </ul>
+
+        </section>
+
+        <section>
+
+          <ul>
+            <li>Docker</li>
+              <ul>
+                <li>Build portable application images that contains all dependencies</li>
+                <li>Resource Isolation</li>
+                <li>Needs management to see full benefits</li>
+              </ul>
+            <br />
+            <li>OpenShift</li>
+              <ul>
+                <li>Orchestrate multiple images to form complete applications</li>
+                <li>Version control infrastructure</li>
+                <li>Provision and scale as required, when required</li>
+                <li>Designed to integrate into existing environments</li>
+              </ul>
+          </ul>
+        </section>
+
+        <section>
+          <h2>What's next?</h2>
+          <ul>
+            <li>OpenShift running in internal lab</li>
+            <li>Group Private Cloud supporting Docker</li>
+            <li>eComm using Docker in the DMZ</li>
+          </ul>
+        </section>
+
+        <section style="text-align: left;">
+          <h2>Questions?</h2>
+          <p>
+            <small><a href="mailto:craig.munro@rbs.com">craig.munro@rbs.com</a></small>
+          </p>
+
+        </section>
+      </div>
+
+    </div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+  			// Full list of configuration options available at:
+  			// https://github.com/hakimel/reveal.js#configuration
+  			Reveal.initialize({
+  				controls: true,
+  				progress: true,
+  				history: true,
+  				center: true,
+
+  				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+  				// Optional reveal.js plugins
+  				dependencies: [
+         { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+         { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+         { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+         { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+         { src: 'plugin/zoom-js/zoom.js', async: true },
+         { src: 'plugin/notes/notes.js', async: true }
+         ]
+       });
+
+      // custom code for navigation by mouse
+      //window.addEventListener("mousedown", handleClick, false);
+      //window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+
+      //function handleClick(e) {
+      //  e.preventDefault();
+      //  if(e.button === 0) Reveal.next(); 
+      //  if(e.button === 2) Reveal.prev(); 
+      //}
+
+  		</script>
+
+  	</body>
+    </html>
